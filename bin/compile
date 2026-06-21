@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+BUILD_DIR="$1"
+echo "-----> Artha prebuilt-slug buildpack"
+cd "$BUILD_DIR"
+if [ ! -f slug.tar.gz ]; then
+  echo " !     slug.tar.gz not found in build dir"; ls -la "$BUILD_DIR"; exit 1
+fi
+echo "       decompressing prebuilt slug ($(du -h slug.tar.gz | cut -f1))..."
+tar xzf slug.tar.gz -C "$BUILD_DIR"
+rm -f slug.tar.gz
+chmod +x "$BUILD_DIR/run.sh" 2>/dev/null || true
+chmod +x "$BUILD_DIR/node" 2>/dev/null || true
+echo "       done. build dir size: $(du -sh "$BUILD_DIR" | cut -f1)"

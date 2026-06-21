@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo "Artha Prebuilt Slug"
+exit 0
