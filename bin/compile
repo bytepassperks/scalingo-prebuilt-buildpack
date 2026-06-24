@@ -12,3 +12,25 @@ rm -f slug.tar.gz
 chmod +x "$BUILD_DIR/run.sh" 2>/dev/null || true
 chmod +x "$BUILD_DIR/node" 2>/dev/null || true
 echo "       done. build dir size: $(du -sh "$BUILD_DIR" | cut -f1)"
+
+# --- Post-extract patches: fix missing i18n keys in adminDashboard ---
+WF="$BUILD_DIR/baserow/web-frontend"
+LOCALE_CHUNK=$(grep -rl 'adminDashboard:{title:"Dashboard"' "$WF/.nuxt/dist/client" 2>/dev/null | head -1)
+if [ -n "$LOCALE_CHUNK" ]; then
+  echo "-----> Patching missing adminDashboard i18n keys"
+  # English
+  sed -i 's/viewAll:"View all"}/viewAll:"View all",noWorkspace:"No workspace",noWorkspaceDescription:"Create a new workspace to get started",addNew:"Create workspace"}/g' "$LOCALE_CHUNK"
+  # French
+  sed -i 's/viewAll:"Consulter"}/viewAll:"Consulter",noWorkspace:"Aucun espace de travail",noWorkspaceDescription:"Créez un nouvel espace de travail pour commencer",addNew:"Créer un espace de travail"}/g' "$LOCALE_CHUNK"
+  # Dutch
+  sed -i 's/viewAll:"Alles bekijken"}/viewAll:"Alles bekijken",noWorkspace:"Geen werkruimte",noWorkspaceDescription:"Maak een nieuwe werkruimte aan om te beginnen",addNew:"Werkruimte aanmaken"}/g' "$LOCALE_CHUNK"
+  # German
+  sed -i 's/viewAll:"Alle anzeigen"}/viewAll:"Alle anzeigen",noWorkspace:"Kein Arbeitsbereich",noWorkspaceDescription:"Erstellen Sie einen neuen Arbeitsbereich",addNew:"Arbeitsbereich erstellen"}/g' "$LOCALE_CHUNK"
+  # Spanish
+  sed -i 's/viewAll:"Ver todo"}/viewAll:"Ver todo",noWorkspace:"Sin espacio de trabajo",noWorkspaceDescription:"Crea un nuevo espacio de trabajo para empezar",addNew:"Crear espacio de trabajo"}/g' "$LOCALE_CHUNK"
+  # Fallback for any remaining language
+  sed -i 's/\(viewAll:"[^"]*"\)}/\1,noWorkspace:"No workspace",noWorkspaceDescription:"Create a new workspace to get started",addNew:"Create workspace"}/g' "$LOCALE_CHUNK"
+  echo "       adminDashboard i18n keys patched"
+else
+  echo "       WARNING: locale chunk not found, skipping i18n patch"
+fi
